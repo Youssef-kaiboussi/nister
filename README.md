@@ -5,7 +5,7 @@
 
 [![Build Status][Build Status Badge]][Build Status] [![Go Report Card](https://goreportcard.com/badge/github.com/YoussefKaib/nister)](https://goreportcard.com/report/github.com/YoussefKaib/nister)
 
-Nister is lightweight Go package returns most recent and modified [CVE](https://cve.mitre.org/) Per **Product or Programing Language** from [National Vulnerability Database](https://nvd.nist.gov/vuln/data-feeds)
+Nister is a lightweight Go package that returns the most recent and modified [CVE](https://cve.mitre.org/) Per **Product or Programing Language** from [National Vulnerability Database](https://nvd.nist.gov/vuln/data-feeds)
 
 ## Installation
 
