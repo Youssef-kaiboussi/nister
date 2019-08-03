@@ -10,10 +10,7 @@ import (
 func main() {
 	products := os.Args
 
-	// Parsed CVE Data
-	data := nister.ParseCVEReport()
-
-	report := nister.ProductChecker(data, products)
+	report := nister.RecentCVES(products)
 
 	fmt.Println(report)
 }

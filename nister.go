@@ -11,10 +11,10 @@ import (
 )
 
 var todayDate = strings.Split(time.Now().Format(time.RFC3339), "T")
-var url = "https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-recent.json.gz"
+var recentURL = "https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-recent.json.gz"
 
 // ParseCVEReport ...
-func ParseCVEReport() Data {
+func ParseCVEReport(url string) Data {
 	response, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -41,8 +41,9 @@ func ParseCVEReport() Data {
 	return d
 }
 
-// ProductChecker ...
-func ProductChecker(cveData Data, clientProducts []string) map[string][]Item {
+// RecentCVES function call retievers today's published and modified CVE by passing an array of products
+func RecentCVES(clientProducts []string) map[string][]Item {
+	cveData := ParseCVEReport(recentURL)
 	cveReport := make(map[string][]Item)
 	recentCVE := []Item{}
 	modifiedCVE := []Item{}
