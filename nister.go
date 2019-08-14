@@ -3,6 +3,7 @@ package nister
 import (
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -41,37 +42,69 @@ func ParseCVEReport(url string) Data {
 	return d
 }
 
+// parsedYearFeeds ...
+func parsedData(year string) []Item {
+	allCVEItems := []Item{}
+	response, err := http.Get(`https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-` + year + `.json.gz`)
+	if err != nil {
+		log.Fatal("failed here1: ", err)
+	}
+	defer response.Body.Close()
+
+	gr, err := gzip.NewReader(response.Body)
+	if err != nil {
+		log.Fatal("failed here2: ", err)
+	}
+
+	defer gr.Close()
+
+	body, err := ioutil.ReadAll(gr)
+	if err != nil {
+		log.Fatal("failed here3: ", err)
+	}
+
+	d := Data{}
+	err = json.Unmarshal(body, &d)
+	if err != nil {
+		log.Fatal("failed here4: ", err)
+	}
+	for _, data := range d.CVEItems {
+		allCVEItems = append(allCVEItems, data)
+	}
+	fmt.Printf("Total CVEs %d YEAR: %v\n", len(d.CVEItems), year)
+
+	return allCVEItems
+}
+
 // RecentCVES function call retievers today's published and modified CVE by passing an array of products
-func RecentCVES(clientProducts []string) map[string][]Item {
+func RecentCVES(clientProduct string) map[string][]Item {
 	cveData := ParseCVEReport(recentURL)
 	cveReport := make(map[string][]Item)
 	recentCVE := []Item{}
 	modifiedCVE := []Item{}
 
-	for _, clientProduct := range clientProducts {
-		for _, cveItem := range cveData.CVEItems {
+	for _, cveItem := range cveData.CVEItems {
+		publishedDate := strings.Split(cveItem.PublishedDate, "T")
+		// check most recent cve when vendor's name not present on report
+		if len(cveItem.CVE.Affects.Vendor.VendorData) == 0 && publishedDate[0] == todayDate[0] {
+			for _, j := range cveItem.CVE.Description.DescriptionData {
 
-			publishedDate := strings.Split(cveItem.PublishedDate, "T")
-			// check most recent cve when vendor's name not present on report
-			if len(cveItem.CVE.Affects.Vendor.VendorData) == 0 && publishedDate[0] == todayDate[0] {
-				for _, j := range cveItem.CVE.Description.DescriptionData {
+				desc := strings.Split(j.Value, " ")
+				for _, k := range desc {
 
-					desc := strings.Split(j.Value, " ")
-					for _, k := range desc {
+					k = strings.ToLower(k)
+					clientProduct = strings.ToLower(clientProduct)
 
-						k = strings.ToLower(k)
-						clientProduct = strings.ToLower(clientProduct)
-
-						var s = []string{}
-						if k == clientProduct {
-							s = append(s, k)
-						}
-						// verify product present in description without duplicate CVE
-						if k == clientProduct && len(s) != 0 {
-							recentCVE = append(recentCVE, cveItem)
-							cveReport["recent_CVE"] = recentCVE
-						}
+					var s = []string{}
+					if k == clientProduct {
+						s = append(s, k)
 					}
+					// verify product present in description without duplicate CVE
+					if k == clientProduct && len(s) != 0 {
+						recentCVE = append(recentCVE, cveItem)
+						cveReport["recent_CVE"] = recentCVE
+					}
+
 				}
 			}
 			// list modified CVE
@@ -92,4 +125,23 @@ func RecentCVES(clientProducts []string) map[string][]Item {
 	}
 
 	return cveReport
+}
+
+// SearchCVE ...
+func SearchCVE(singleCVE string) []Item {
+	// get the year from ID
+	r := strings.Split(singleCVE, "-")
+	cveData := parsedData(r[1])
+
+	cveItems := []Item{}
+
+	for _, cve := range cveData {
+
+		if singleCVE == cve.CVE.MetaData.ID {
+			cveItems = append(cveItems, cve)
+		}
+
+	}
+
+	return cveItems
 }
