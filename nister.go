@@ -2,6 +2,7 @@ package nister
 
 import (
 	"compress/gzip"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -16,7 +17,12 @@ var recentURL = "https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-recent.json.
 
 // ParseCVEReport ...
 func ParseCVEReport(url string) Data {
-	response, err := http.Get(url)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+
+	response, err := client.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -45,7 +51,14 @@ func ParseCVEReport(url string) Data {
 // parsedYearFeeds ...
 func parsedData(year string) []Item {
 	allCVEItems := []Item{}
-	response, err := http.Get(`https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-` + year + `.json.gz`)
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{Transport: tr}
+
+	response, err := client.Get(`https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-` + year + `.json.gz`)
 	if err != nil {
 		log.Fatal("failed here1: ", err)
 	}
@@ -77,9 +90,9 @@ func parsedData(year string) []Item {
 }
 
 // RecentCVES function call retievers today's published and modified CVE by passing an array of products
-func RecentCVES(clientProduct string) map[string][]Item {
+func RecentCVES(clientProduct string) map[int][]Item {
 	cveData := ParseCVEReport(recentURL)
-	cveReport := make(map[string][]Item)
+	cveReport := make(map[int][]Item)
 	recentCVE := []Item{}
 	modifiedCVE := []Item{}
 
@@ -101,8 +114,9 @@ func RecentCVES(clientProduct string) map[string][]Item {
 					}
 					// verify product present in description without duplicate CVE
 					if k == clientProduct && len(s) != 0 {
+						cveItem.Type = "latest_cve"
 						recentCVE = append(recentCVE, cveItem)
-						cveReport["recent_CVE"] = recentCVE
+						cveReport[0] = recentCVE
 					}
 
 				}
@@ -115,9 +129,9 @@ func RecentCVES(clientProduct string) map[string][]Item {
 					clientProduct = strings.ToLower(clientProduct)
 
 					if k.VendorName == clientProduct {
-
+						cveItem.Type = "modified_cve"
 						modifiedCVE = append(modifiedCVE, cveItem)
-						cveReport["modified_CVE"] = modifiedCVE
+						cveReport[1] = modifiedCVE
 					}
 				}
 			}

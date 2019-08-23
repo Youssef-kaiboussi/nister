@@ -8,7 +8,7 @@ import (
 
 func TestRecentCVES(t *testing.T) {
 	report := RecentCVES("cisco")
-	for _, v := range report["modified_CVE"] {
+	for _, v := range report[1] {
 		assert.Equal(t, 13, len(v.CVE.MetaData.ID))
 	}
 

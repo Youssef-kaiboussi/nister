@@ -23,21 +23,18 @@ go get github.com/YoussefKaib/nister
 package main
 
 import (
-	"fmt"
-	"os"
+    "fmt"
+    "os"
 
-	"github.com/youssefkaib/nister"
+    "github.com/youssefkaib/nister"
 )
 
 func main() {
-	products := os.Args
-
-	// Parsed CVE Data
-	data := nister.ParseCVEReport()
-
-	report := nister.ProductChecker(data, products)
-	
-	fmt.Println(report)
+    product := os.Args
+    data := nister.RecentCVES(product[1])
+    for _, v := range data[0] {
+        fmt.Println("ID: ", v.CVE.MetaData.ID)
+    }
 }
 
 ```

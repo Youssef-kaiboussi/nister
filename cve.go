@@ -12,7 +12,8 @@ type Data struct {
 
 // Item ...
 type Item struct {
-	CVE struct {
+	Type string
+	CVE  struct {
 		Type     string `json:"data_type"`
 		Formart  string `json:"data_format"`
 		Version  string `json:"data_version"`
