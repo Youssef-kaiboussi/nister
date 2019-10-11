@@ -4,7 +4,6 @@ import (
 	"compress/gzip"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -46,47 +45,6 @@ func ParseCVEReport(url string) Data {
 	}
 
 	return d
-}
-
-// parsedYearFeeds ...
-func parsedData(year string) []Item {
-	allCVEItems := []Item{}
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	client := &http.Client{Transport: tr}
-
-	response, err := client.Get(`https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-` + year + `.json.gz`)
-	if err != nil {
-		log.Fatal("failed here1: ", err)
-	}
-	defer response.Body.Close()
-
-	gr, err := gzip.NewReader(response.Body)
-	if err != nil {
-		log.Fatal("failed here2: ", err)
-	}
-
-	defer gr.Close()
-
-	body, err := ioutil.ReadAll(gr)
-	if err != nil {
-		log.Fatal("failed here3: ", err)
-	}
-
-	d := Data{}
-	err = json.Unmarshal(body, &d)
-	if err != nil {
-		log.Fatal("failed here4: ", err)
-	}
-	for _, data := range d.CVEItems {
-		allCVEItems = append(allCVEItems, data)
-	}
-	fmt.Printf("Total CVEs %d YEAR: %v\n", len(d.CVEItems), year)
-
-	return allCVEItems
 }
 
 // RecentCVES function call retievers today's published and modified CVE by passing an array of products
@@ -141,21 +99,50 @@ func RecentCVES(clientProduct string) map[int][]Item {
 	return cveReport
 }
 
-// SearchCVE ...
-func SearchCVE(singleCVE string) []Item {
-	// get the year from ID
-	r := strings.Split(singleCVE, "-")
-	cveData := parsedData(r[1])
+// HighCVE checks today CVE with HIGH Severity
+func HighCVE() []Item {
+	cveData := ParseCVEReport(recentURL)
+	recentCVE := []Item{}
 
-	cveItems := []Item{}
+	for _, cveItem := range cveData.CVEItems {
+		publishedDate := strings.Split(cveItem.PublishedDate, "T")
 
-	for _, cve := range cveData {
-
-		if singleCVE == cve.CVE.MetaData.ID {
-			cveItems = append(cveItems, cve)
+		if cveItem.Impact.BaseMetricV2.Severity == "HIGH" && publishedDate[0] == todayDate[0] {
+			recentCVE = append(recentCVE, cveItem)
 		}
-
 	}
 
-	return cveItems
+	return recentCVE
+}
+
+// MediumCVE checks today CVE with Medium Severity
+func MediumCVE() []Item {
+	cveData := ParseCVEReport(recentURL)
+	recentCVE := []Item{}
+
+	for _, cveItem := range cveData.CVEItems {
+		publishedDate := strings.Split(cveItem.PublishedDate, "T")
+
+		if cveItem.Impact.BaseMetricV2.Severity == "MEDIUM" && publishedDate[0] == todayDate[0] {
+			recentCVE = append(recentCVE, cveItem)
+		}
+	}
+
+	return recentCVE
+}
+
+// LowCVE checks today's CVE with LOW Severity
+func LowCVE() []Item {
+	cveData := ParseCVEReport(recentURL)
+	recentCVE := []Item{}
+
+	for _, cveItem := range cveData.CVEItems {
+		publishedDate := strings.Split(cveItem.PublishedDate, "T")
+
+		if cveItem.Impact.BaseMetricV2.Severity == "LOW" && publishedDate[0] == todayDate[0] {
+			recentCVE = append(recentCVE, cveItem)
+		}
+	}
+
+	return recentCVE
 }

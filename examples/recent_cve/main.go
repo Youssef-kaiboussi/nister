@@ -7,9 +7,8 @@ import (
 )
 
 func main() {
-	// product := os.Args
-	data := nister.RecentCVES("python")
-	for _, v := range data[0] {
+	data := nister.HighCVE()
+	for _, v := range data {
 		fmt.Println("ID: ", v.CVE.MetaData.ID)
 	}
 }
