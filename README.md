@@ -5,7 +5,7 @@
 
 [![Build Status][Build Status Badge]][Build Status] [![Go Report Card](https://goreportcard.com/badge/github.com/YoussefKaib/nister)](https://goreportcard.com/report/github.com/YoussefKaib/nister)
 
-Nister is a lightweight Go package that returns the most recent and modified [CVE](https://cve.mitre.org/) Per **Product or Programing Language** from [National Vulnerability Database](https://nvd.nist.gov/vuln/data-feeds)
+Nister is a lightweight Go package that returns the most recent, modified [CVE](https://cve.mitre.org/) Per **Product or Programing Language** from [National Vulnerability Database](https://nvd.nist.gov/vuln/data-feeds) and HIGH, MEDIUM, LOW severities.
 
 ## Installation
 
@@ -23,21 +23,18 @@ go get github.com/YoussefKaib/nister
 package main
 
 import (
-	"fmt"
-	"os"
+    "fmt"
+    "os"
 
-	"github.com/youssefkaib/nister"
+    "github.com/youssefkaib/nister"
 )
 
 func main() {
-	products := os.Args
-
-	// Parsed CVE Data
-	data := nister.ParseCVEReport()
-
-	report := nister.ProductChecker(data, products)
-	
-	fmt.Println(report)
+    product := os.Args
+    data := nister.RecentCVES(product[1])
+    for _, v := range data[0] {
+        fmt.Println("ID: ", v.CVE.MetaData.ID)
+    }
 }
 
 ```
