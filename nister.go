@@ -12,7 +12,7 @@ import (
 )
 
 var todayDate = strings.Split(time.Now().Format(time.RFC3339), "T")
-var recentURL = "https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-recent.json.gz"
+var recentURL = "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-recent.json.gz"
 
 // ParseCVEReport ...
 func ParseCVEReport(url string) Data {
