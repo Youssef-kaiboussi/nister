@@ -5,7 +5,7 @@ import (
 
 	"github.com/bluele/slack"
 
-	"github.com/Youssef-kaiboussi/nister"
+	"github.com/ykaiboussi/nister"
 )
 
 func main() {

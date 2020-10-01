@@ -1,23 +1,23 @@
-[Build Status]: https://travis-ci.org/Youssef-kaiboussi/nister
-[Build Status Badge]:https://travis-ci.com/Youssef-kaiboussi/nister.svg?branch=master
+[Build Status]: https://travis-ci.org/ykaiboussi/nister
+[Build Status Badge]:https://travis-ci.com/ykaiboussi/nister.svg?branch=master
 
 # Nister
 
-[![Build Status][Build Status Badge]][Build Status] [![Go Report Card](https://goreportcard.com/badge/github.com/Youssef-kaiboussi/nister)](https://goreportcard.com/report/github.com/Youssef-kaiboussi/nister)
+[![Build Status][Build Status Badge]][Build Status] [![Go Report Card](https://goreportcard.com/badge/github.com/ykaiboussi/nister)](https://goreportcard.com/report/github.com/ykaiboussi/nister)
 
 Nister is a lightweight Go package that returns the most recent, modified [CVE](https://cve.mitre.org/) Per **Product or Programing Language** from [National Vulnerability Database](https://nvd.nist.gov/vuln/data-feeds) and HIGH, MEDIUM, LOW severities.
 
 ## Installation
 
 ```md
-go get github.com/Youssef-kaiboussi/nister
+go get github.com/ykaiboussi/nister
 ```
 
 ### CLI Example
 
 ![](https://media.giphy.com/media/hvGbporNaP1xozXbxn/giphy.gif)
 
-![nister_cli](https://github.com/Youssef-kaiboussi/nister/blob/master/images/nister_cli_example.png)
+![nister_cli](https://github.com/ykaiboussi/nister/blob/master/images/nister_cli_example.png)
 
 ```go
 package main
@@ -26,7 +26,7 @@ import (
     "fmt"
     "os"
 
-    "github.com/Youssef-kaiboussi/nister"
+    "github.com/ykaiboussi/nister"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/Youssef-kaiboussi/nister"
+	"github.com/ykaiboussi/nister"
 )
 
 func main() {

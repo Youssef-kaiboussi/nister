@@ -12,7 +12,7 @@ import (
 )
 
 var todayDate = strings.Split(time.Now().Format(time.RFC3339), "T")
-var recentURL = "https://nvd.nist.gov/feeds/json/cve/1.0/nvdcve-1.0-recent.json.gz"
+var recentURL = "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-recent.json.gz"
 
 // ParseCVEReport ...
 func ParseCVEReport(url string) Data {
@@ -24,6 +24,10 @@ func ParseCVEReport(url string) Data {
 	response, err := client.Get(url)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if response.StatusCode != 200 {
+		log.Printf("Failed request response code: %v", response.StatusCode)
 	}
 
 	gr, err := gzip.NewReader(response.Body)
@@ -145,4 +149,37 @@ func LowCVE() []Item {
 	}
 
 	return recentCVE
+}
+
+func PublishAll() map[int][]Item {
+	cveData := ParseCVEReport(recentURL)
+	cveReport := make(map[int][]Item)
+	recentCVE := []Item{}
+
+	for _, cveItem := range cveData.CVEItems {
+		publishedDate := strings.Split(cveItem.PublishedDate, "T")
+		// check most recent cve when vendor's name not present on report
+		if len(cveItem.CVE.Affects.Vendor.VendorData) == 0 && publishedDate[0] == todayDate[0] {
+			cveItem.Type = "latest_cve"
+			recentCVE = append(recentCVE, cveItem)
+			cveReport[0] = recentCVE
+		}
+	}
+
+	return cveReport
+}
+
+func ModifiedAll() map[int][]Item {
+	cveData := ParseCVEReport(recentURL)
+	cveReport := make(map[int][]Item)
+	modifiedCVE := []Item{}
+
+	for _, cveItem := range cveData.CVEItems {
+		// list modified CVE
+		if len(cveItem.CVE.Affects.Vendor.VendorData) != 0 {
+			modifiedCVE = append(modifiedCVE, cveItem)
+		}
+	}
+
+	return cveReport
 }
